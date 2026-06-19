@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables (VERY IMPORTANT)
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Runtime data
+data/
+reports/
+screenshots/
+
+# OS files
+.DS_Store
+
+# Playwright cache
+playwright/.cache
