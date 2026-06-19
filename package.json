@@ -17,5 +17,8 @@
     "node-cron": "^4.4.1",
     "nodemailer": "^9.0.1",
     "playwright": "^1.61.0"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }

@@ -2,7 +2,7 @@ name: Daily AI Job Agent
 
 on:
   schedule:
-    - cron: "30 4 * * *"  # 10:00 AM IST
+    - cron: "30 4 * * *"
   workflow_dispatch:
 
 jobs:
@@ -18,8 +18,13 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Create folders
+        run: mkdir -p data reports screenshots
+
+      - name: Clean install
+        run: |
+          npm cache clean --force
+          npm install
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
