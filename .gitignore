@@ -20,3 +20,5 @@ screenshots/
 
 # Playwright cache
 playwright/.cache
+
+gitignore
