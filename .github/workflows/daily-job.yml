@@ -1,0 +1,28 @@
+name: Daily AI Job Agent
+
+on:
+  schedule:
+    - cron: "30 4 * * *"  # 10:00 AM IST (4:30 AM UTC)
+  workflow_dispatch:
+
+jobs:
+  run-job-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run job agent
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        run: node src/index.js
