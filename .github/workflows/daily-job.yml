@@ -16,14 +16,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.18.1
 
       - name: Create folders
         run: mkdir -p data reports screenshots
 
       - name: Clean install
         run: |
-          npm cache clean --force
+          rm -rf node_modules package-lock.json || true
           npm install
 
       - name: Install Playwright browsers
