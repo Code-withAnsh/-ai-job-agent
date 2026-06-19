@@ -1,47 +1,41 @@
-require("dotenv").config();
 const fs = require("fs");
-const cron = require("node-cron");
-
 const { fetchInternships } = require("./scrapers/internshala");
 const { filterJobs } = require("./filters/jobFilter");
 const { sendEmail } = require("./email/emailService");
 
-async function runJobAgent() {
-  console.log("🚀 Job Agent Running...");
+async function main() {
+  try {
+    console.log("🚀 Starting AI Job Agent...");
 
-  await fetchInternships();
+    await fetchInternships();
 
-  const jobs = JSON.parse(fs.readFileSync("data/jobs.json", "utf-8"));
+    const jobs = JSON.parse(fs.readFileSync("data/jobs.json", "utf-8"));
 
-  const filtered = filterJobs(jobs, {
-    roles: ["Web", "Developer", "Full Stack", "Frontend", "Backend"],
-    locations: ["Delhi", "Noida", "Remote"],
-    minStipend: 0,
-    allowRemote: true,
-  });
+    const filtered = filterJobs(jobs, {
+      roles: ["Web", "Developer", "Full Stack", "Frontend", "Backend"],
+      locations: ["Delhi", "Noida", "Remote", "Work from home"],
+      minStipend: 0,
+      allowRemote: true,
+    });
 
-  const topJobs = filtered.slice(0, 5);
+    console.log("\n🔥 FILTERED JOBS:", filtered.length);
 
-  console.log("📊 Jobs Found:", filtered.length);
-  console.log("📩 Sending Email with Top:", topJobs.length);
+    if (filtered.length === 0) {
+      console.log("⚠️ No matching jobs found today");
+      return;
+    }
 
-  await sendEmail(topJobs);
+    const topJobs = filtered.slice(0, 5);
 
-  console.log("✅ Cycle Complete");
+    console.log("📊 TOP JOBS FOR EMAIL:", topJobs.length);
+
+    await sendEmail(topJobs);
+
+    console.log("✅ Process completed successfully");
+  } catch (err) {
+    console.error("❌ Fatal error:", err.message);
+    process.exit(1);
+  }
 }
 
-/**
- * ⏰ CRON JOB (10 AM DAILY)
- * Format: minute hour day month weekday
- * 0 10 * * *  => 10:00 AM every day
- */
-cron.schedule("0 10 * * *", () => {
-  runJobAgent();
-  console.log("⏰ Scheduled run at 10 AM triggered");
-});
-
-console.log("🤖 AI Job Agent is running in background...");
-console.log("⏰ Waiting for 10:00 AM daily execution...");
-
-// Optional: test run immediately
-runJobAgent();
+main();

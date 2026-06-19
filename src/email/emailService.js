@@ -2,10 +2,13 @@ const nodemailer = require("nodemailer");
 
 async function sendEmail(jobs) {
   try {
+    if (!jobs || jobs.length === 0) {
+      console.log("⚠️ No jobs to send email");
+      return;
+    }
+
     let transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -15,81 +18,83 @@ async function sendEmail(jobs) {
     const html = generateHTML(jobs);
 
     await transporter.sendMail({
-      from: `"AI Job Agent" <${process.env.EMAIL_USER}>`,
+      from: `"AI Job Agent 🤖" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
-      subject: "🔥 Daily Top Internships (AI Curated)",
+      subject: `🔥 Top Internships Today (Score: ${jobs[0]?.score || 0})`,
       html,
     });
 
     console.log("📩 Email sent successfully!");
   } catch (err) {
-    console.log("Email error:", err.message);
+    console.log("❌ Email error:", err.message);
   }
 }
 
+/* ---------------- HTML TEMPLATE ---------------- */
+
 function generateHTML(jobs) {
   let html = `
-  <div style="font-family:Arial;background:#f6f7fb;padding:20px;">
-    <div style="max-width:700px;margin:auto;background:#fff;padding:20px;border-radius:10px;">
-      
-      <h1 style="text-align:center;color:#222;">
-        🔥 AI Curated Internships
+  <div style="font-family:Arial,sans-serif;background:#f4f6f9;padding:20px;">
+    <div style="max-width:750px;margin:auto;background:#ffffff;padding:25px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+
+      <h1 style="text-align:center;color:#111;margin-bottom:5px;">
+        🚀 AI Curated Internships
       </h1>
-      <p style="text-align:center;color:#666;">
-        Top opportunities picked for you today
+
+      <p style="text-align:center;color:#666;margin-bottom:20px;">
+        Handpicked opportunities based on your profile
       </p>
-      <hr/>
+
+      <hr style="border:none;border-top:1px solid #eee;margin-bottom:20px;" />
   `;
 
   jobs.forEach((job, i) => {
+    const skills = job.skills?.length ? job.skills : ["Not specified"];
+
     html += `
-      <div style="border:1px solid #eee;padding:15px;margin-bottom:15px;border-radius:10px;">
-        
+      <div style="border:1px solid #eee;border-radius:10px;padding:15px;margin-bottom:15px;">
+
         <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h2 style="margin:0;font-size:18px;color:#333;">
+          <h2 style="font-size:18px;margin:0;color:#222;">
             ${i + 1}. ${job.title}
           </h2>
 
           <span style="
             background:#e8f0ff;
             color:#1a73e8;
-            padding:5px 10px;
+            padding:5px 12px;
             border-radius:20px;
             font-size:12px;
             font-weight:bold;
           ">
-            Score: ${job.score}
+            ⭐ Score: ${job.score}
           </span>
         </div>
 
-        <p style="margin:5px 0;"><b>🏢 Company:</b> ${job.company}</p>
-        <p style="margin:5px 0;"><b>📍 Location:</b> ${job.location}</p>
-        <p style="margin:5px 0;"><b>💰 Stipend:</b> ${job.stipend}</p>
+        <p style="margin:6px 0;"><b>🏢 Company:</b> ${job.company}</p>
+        <p style="margin:6px 0;"><b>📍 Location:</b> ${job.location}</p>
+        <p style="margin:6px 0;"><b>💰 Stipend:</b> ${job.stipend}</p>
 
         <p style="margin-top:10px;"><b>🧠 Skills Required:</b></p>
 
-        <div style="margin-bottom:10px;">
-          ${
-            job.skills && job.skills.length
-              ? job.skills
-                  .map(
-                    (skill) => `
-                    <span style="
-                      display:inline-block;
-                      background:#f1f1f1;
-                      color:#333;
-                      padding:5px 10px;
-                      margin:3px;
-                      border-radius:15px;
-                      font-size:12px;
-                    ">
-                      ${skill}
-                    </span>
-                  `
-                  )
-                  .join("")
-              : `<span style="color:#999;">Not specified</span>`
-          }
+        <div style="margin:8px 0;">
+          ${skills
+            .map(
+              (skill) => `
+              <span style="
+                display:inline-block;
+                background:#f1f3f5;
+                color:#333;
+                padding:5px 10px;
+                margin:3px;
+                border-radius:15px;
+                font-size:12px;
+              ">
+                ${skill}
+              </span>
+            `
+            )
+            .join("")}
         </div>
 
         <a href="${job.applyLink}" target="_blank"
@@ -98,7 +103,7 @@ function generateHTML(jobs) {
             margin-top:10px;
             background:#1a73e8;
             color:#fff;
-            padding:8px 15px;
+            padding:10px 15px;
             border-radius:6px;
             text-decoration:none;
             font-size:13px;
@@ -111,8 +116,8 @@ function generateHTML(jobs) {
   });
 
   html += `
-      <p style="text-align:center;color:#888;font-size:12px;">
-        Generated by AI Job Agent 🤖
+      <p style="text-align:center;color:#999;font-size:12px;margin-top:20px;">
+        Generated by <b>AI Job Agent</b> 🤖
       </p>
     </div>
   </div>
